@@ -7,7 +7,8 @@ var commands =
       "help",
       "clear",
       "resume",
-      "projects"
+      "projects",
+      "joora"
     ];
 
 function appendChar(char, id){
@@ -118,4 +119,8 @@ function help(){
 
 function clear(){
   $("#displayText").empty();
+}
+
+function joora(){
+  print("FAG<br/>");
 }
