@@ -84,7 +84,7 @@ $(document).click(function(){
 $("#shell").keypress(function(e){
   if(e.which == 13){
     // Get the string from input and trim it
-    var input = $("#shell").val().trim();
+    var input = $("#shell").val().trim().toLowerCase();
 
     // Print the shell prompt
     print("[feelqah@github ~]$ " + input + "<br/>");
