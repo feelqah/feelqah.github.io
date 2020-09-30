@@ -1,0 +1,25 @@
+body{
+  background-color: black;
+  color: green;
+  font-family: monospace;
+  font-size: 16px;
+  color:green;
+  text-shadow: 0 0 0 gray;
+  cursor: none;
+}
+
+#shell{
+  padding-left: 0;
+  background-color: black;
+  border: none;
+  color:green;
+  -moz-appearance: none;
+  -webkit-appearance: none;
+  appearance: none;
+  text-shadow: 0 0 0 gray;
+  font-size: 16px;
+}
+
+#shell:focus {
+    outline: none;
+}
