@@ -6,29 +6,35 @@ var commands =
     [
       "help",
       "clear",
-      "resume",
-      "projects"
+      "skills",
+      "experience",
+      "education",
+      "projects",
+      "aboutme",
+      "contact"
     ];
 
 function appendChar(char, id){
   if(char == "\n"){
     $("#" + id).append("<br/>");
   }
+  else if(char == "\t"){
+    $("#" + id).append("    "); // tab = 4 spaces
+  }
   else{
     $("#" + id).append(char);
   }
 }
 
-function displayTyping(text, id="displayText"){
+function displayTyping(text, id="displayText", speed=15){
   var i = 0;
   var len = text.length;
   var timeoutID = 0;
   var timeout = 0;
-  var typingSpeed = 15;
 
   while(i <= len){
    timeoutID = setTimeout(appendChar, timeout, text[i], id);
-   timeout += typingSpeed;
+   timeout += speed;
    i++;
   }
   clearInterval(timeoutID);
@@ -118,4 +124,29 @@ function help(){
 
 function clear(){
   $("#displayText").empty();
+}
+
+// TODO: Hide shell while messages are being displayed!
+function skills(){
+  displayTyping(skillsInfo);
+}
+
+function experience(){
+  displayTyping(experienceInfo);
+}
+
+function education(){
+  setTimeout(displayTyping, 3000, educationInfo, "displayText", 25);
+}
+
+function projects(){
+  setTimeout(displayTyping, 3000, projectsInfo, "displayText", 25);
+}
+
+function aboutme(){
+  displayTyping(aboutmeInfo);
+}
+
+function contact(){
+  setTimeout(displayTyping, 3000, contactInfo, "displayText", 25);
 }
