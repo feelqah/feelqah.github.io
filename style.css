@@ -1,23 +1,36 @@
 body{
   background-color: black;
+
+  cursor: none;
+}
+
+#displayText{
   color: green;
   font-family: monospace;
-  font-size: 16px;
+  font-size: 1.25em;
   color:green;
   text-shadow: 0 0 0 gray;
-  cursor: none;
+}
+
+#shellContainer{
+  color: green;
+  font-family: monospace;
+  font-size: 1.25em;
+  color:green;
+  text-shadow: 0 0 0 gray;
 }
 
 #shell{
   padding-left: 0;
   background-color: black;
   border: none;
-  color:green;
+  color: green;
   -moz-appearance: none;
   -webkit-appearance: none;
   appearance: none;
   text-shadow: 0 0 0 gray;
-  font-size: 16px;
+  font-size: 0.8em;
+  height: 0.9em;
 }
 
 #shell:focus {
