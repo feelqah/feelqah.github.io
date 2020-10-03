@@ -29,8 +29,9 @@ body{
   -webkit-appearance: none;
   appearance: none;
   text-shadow: 0 0 0 gray;
-  font-size: 0.8em;
-  height: 0.9em;
+  font-family: monospace;
+  font-size: 1em;
+  height: 1em;
 }
 
 #shell:focus {
