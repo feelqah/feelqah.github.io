@@ -37,11 +37,10 @@ var experienceInfo =
 "Software components and turnkey solutions for in-car STB (Set TopBox) and TV products based on iWedia software\n" +
 "• Developing STB features in C\n" +
 "• Debugging the software in GDB (multi-threaded C software)\n" +
-"• Creating a dynamic code analysis build using CLANG sanitizers\n";
+"• Creating a dynamic code analysis build using CLANG sanitizers\n" +
 
 
-
-"Feb 2016 - Apr 2016\n" + 
+"\nFeb 2016 - Apr 2016\n" + 
 "RT-RK, Embedded Software Engineering intern\n" + 
 "Harman project - Automotive Digital Television system\n" + 
 "Software components and turnkey solutions for in-car STB (Set TopBox) and TV products based on iWedia software\n" + 
@@ -49,7 +48,7 @@ var experienceInfo =
 "• Performing dynamic code analysis using Valgrind\n" + 
 
 
-"Jun 2015 - Feb 2016\n" +
+"\nJun 2015 - Feb 2016\n" +
 "RT-RK, Compiler Tools Engineering intern\n" +
 "LLVM Project\n" +
 "The LLVM compiler infrastructure project is a collection of modular andreusable compiler and toolchain technologies used for developingcompiler frontends and backends\n" +
@@ -58,8 +57,7 @@ var experienceInfo =
 "• Implementing MIPS instructions to the LLVM backend\n" +
 
 
-
-"Sep 2013 - Feb 2014\n" +
+"\nSep 2013 - Feb 2014\n" +
 "T-COM,  Technical Support\n" +
 "Student job at Croatian Telecom T-COM\n" +
 "• Supporting telecom field technicians\n" +
@@ -67,29 +65,43 @@ var experienceInfo =
 "• Remote configuration of telecom user router\n" +
 
 
-
-"Sep 2009 - Jun 2010\n" +
+"\nSep 2009 - Jun 2010\n" +
 "POINT, Computer Service Intern\n" +
 "Internship at a local computer service shop while in high school\n" +
 "• Installing Operating Systems on customer PC’s\n" +
 "• Diagnosing and fixing common PC hardware and software problems\n";
 
 
+var educationInfo = 
+"2016 Master's degree - Computer Engineer\n" +
+"Faculty of Electrical Engineering Osijek\n" +
+"Notable courses:\n" +
+"Computer Architecture, Computer Networks, Programming in C/C++, Operating Systems, Web programming and Real-time Computer Systems\n" +
+"Graduation paper:\n" +
+"Transport protocol Stream Control Transmission Protocol (SCTP) in distributed  application development\n" +
 
-var educationInfo = [
-  ""
-];
 
-var projectsInfo = [
-  ""
-];
+"\n2010 High School Diploma – Electronics technician\n" +
+"Electrical Engineering and Traffic School Osijek\n" +
+"Notable classes:\n" +
+"Digital electronics, C Programming, Intro to Microprocessors, Robotics\n" +
+"Graduation paper:\n" +
+"Laser beam amplitude modulation\n" +
+"Electronics projects where sound from an mp3 player was sent over a laser beam to a photoresistor which was connected to an amplifier and a speaker\n";
 
-var aboutmeInfo = "\nEmbedded Software Engineer with 5 years experience in Embedded and Automotive field and\n" +
+
+var projectsInfo = {
+  "Little Computer 3 Virtual Machine": "https://github.com/feelqah/LC3_VM",
+  "Simple 'Toy' Shell": "https://github.com/feelqah/ToyShell",
+  "Website Spell Checker for Croatian websites": "https://github.com/feelqah/CroSiteSpellCheck"
+};
+
+var aboutmeInfo = "\nEmbedded Software Engineer from Osijek, Croatia, with 5 years experience in Embedded and Automotive field and\n" +
   "an extensive range of skills including software development, debugging, task automation and software testing.\n" +
   "\nAlso, I volunteer at a local dog shelter and try to live eco-friendly as possible with a DIY mindset \n" +
   "(always trying to build stuff from scratch, no matter the field).\n";
 
-var contactInfo = [
-  ""
-];
+var contactInfo = 
+  "email: fmaric.os@gmail.com\n" +
+  "phone: +385976472678\n";
 

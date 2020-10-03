@@ -1,3 +1,8 @@
+/*TODO: - Add history
+        - TAB completion
+        - 
+*/
+
 /* Messages */
 var welcome_message = "Type in a command (or 'help' to list all supported commands):\nType 'help command' to find out more about the specific command.\n";
 
@@ -24,6 +29,7 @@ function appendChar(char, id){
   else{
     $("#" + id).append(char);
   }
+  $("#shell").get(0).scrollIntoView();
 }
 
 function displayTyping(text, id="displayText", speed=15){
@@ -33,9 +39,9 @@ function displayTyping(text, id="displayText", speed=15){
   var timeout = 0;
 
   while(i <= len){
-   timeoutID = setTimeout(appendChar, timeout, text[i], id);
-   timeout += speed;
-   i++;
+    timeoutID = setTimeout(appendChar, timeout, text[i], id);
+    timeout += speed;
+    i++;
   }
   clearInterval(timeoutID);
 }
@@ -89,6 +95,7 @@ $(document).click(function(){
 // On keypress check for enter key (13)
 $("#shell").keypress(function(e){
   if(e.which == 13){
+    $("#shell").focus();
     // Get the string from input and trim it
     var input = $("#shell").val().trim().toLowerCase();
 
@@ -112,6 +119,7 @@ $("#shell").keypress(function(e){
 }); /* End of main */
 
 
+
 /* command implementations */
 
 function help(){
@@ -120,6 +128,7 @@ function help(){
   for(var i=0; i < commands.length; i++){
     print(commands[i]+"<br/>");
   }
+  $("#shell").get(0).scrollIntoView();
 }
 
 function clear(){
@@ -132,15 +141,18 @@ function skills(){
 }
 
 function experience(){
-  displayTyping(experienceInfo);
+  displayTyping(experienceInfo, "displayText", 5);
 }
 
 function education(){
-  setTimeout(displayTyping, 3000, educationInfo, "displayText", 25);
+  displayTyping(educationInfo);
 }
 
 function projects(){
-  setTimeout(displayTyping, 3000, projectsInfo, "displayText", 25);
+  for(var key in projectsInfo) {
+    $("#displayText").append("<a href=" + projectsInfo[key] + "  target='_blank'>" + key + " </a> <br/>");
+  }
+  $("#shell").get(0).scrollIntoView();
 }
 
 function aboutme(){
@@ -148,5 +160,5 @@ function aboutme(){
 }
 
 function contact(){
-  setTimeout(displayTyping, 3000, contactInfo, "displayText", 25);
+  displayTyping(contactInfo);
 }
