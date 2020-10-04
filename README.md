@@ -1,7 +1,7 @@
-# Resume Shell
+# Résumé Shell
 
 
-Resume Shell is a shell looking website that you can use as your resume.
+Résumé Shell is a shell looking website that you can use as your resume.
 
 
 ## Usage
