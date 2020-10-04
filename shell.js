@@ -174,6 +174,6 @@ function contact(){
 }
 
 function resume(){
-  $("#displayText").append('<a href="#" onclick="window.open(\'resume.pdf\', \'_blank\', \'fullscreen=yes\'); return false;">PDF Résumé</a>');
+  $("#displayText").append('<a href="#" onclick="window.open(\'resume.pdf\', \'_blank\', \'fullscreen=yes\'); return false;">PDF Résumé</a> <br/>');
   $("#shell").get(0).scrollIntoView();
 }
