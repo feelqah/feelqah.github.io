@@ -1,6 +1,7 @@
 /*TODO: - Add history
         - TAB completion
-        - 
+        - Add basic shell commands - pwd, cd, ls, cat
+        - a fake file system
 */
 
 /* Messages */
@@ -16,7 +17,9 @@ var commands =
       "education",
       "projects",
       "aboutme",
-      "contact"
+      "interests",
+      "contact",
+      "resume"
     ];
 
 function appendChar(char, id){
@@ -32,7 +35,7 @@ function appendChar(char, id){
   $("#shell").get(0).scrollIntoView();
 }
 
-function displayTyping(text, id="displayText", speed=15){
+function displayTyping(text, id="displayText", speed=5){
   var i = 0;
   var len = text.length;
   var timeoutID = 0;
@@ -85,7 +88,7 @@ $(document).ready(function() {
 displayTyping(welcome_message);
 
 // Wait 2s then show shellContainer
-setTimeout(showElement, 2000, "shellContainer");
+setTimeout(showElement, 800, "shellContainer");
 
 // If the user clicks anywhere in the document, focus the shell
 $(document).click(function(){
@@ -141,7 +144,7 @@ function skills(){
 }
 
 function experience(){
-  displayTyping(experienceInfo, "displayText", 5);
+  displayTyping(experienceInfo, "displayText", 2);
 }
 
 function education(){
@@ -159,6 +162,18 @@ function aboutme(){
   displayTyping(aboutmeInfo);
 }
 
+function interests(){
+  displayTyping(interestsInfo);
+}
+
 function contact(){
-  displayTyping(contactInfo);
+  for(var i=0;i<contactInfo.length;i++){
+    $("#displayText").append(contactInfo[i]);
+  }
+  $("#shell").get(0).scrollIntoView();
+}
+
+function resume(){
+  $("#displayText").append('<a href="#" onclick="window.open(\'resume.pdf\', \'_blank\', \'fullscreen=yes\'); return false;">PDF Résumé</a>');
+  $("#shell").get(0).scrollIntoView();
 }

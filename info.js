@@ -101,7 +101,23 @@ var aboutmeInfo = "\nEmbedded Software Engineer from Osijek, Croatia, with 5 yea
   "\nAlso, I volunteer at a local dog shelter and try to live eco-friendly as possible with a DIY mindset \n" +
   "(always trying to build stuff from scratch, no matter the field).\n";
 
-var contactInfo = 
-  "email: fmaric.os@gmail.com\n" +
-  "phone: +385976472678\n";
+var interestsInfo =
+"• Software Development\n" +
+"• Electronics  \n" +
+"• Cyber Security\n" +
+"• Ethical Hacking \n" +
+"• Physics\n" +
+"• Eastern Philosophy\n" +
+"• Psychology \n" +
+"• Everything DIY \n" +
+"• Permaculture gardening\n" +
+"• Cooking\n" +
+"• Hiking\n" +
+"• Animal Welfare \n" +
+"• Social Justice \n" +
+"• Activism\n";
 
+var contactInfo = [
+  "email: <a href='mailto:fmaric.os@gmail.com'>fmaric.os@gmail.com</a><br/>",
+  "phone: +385976472678 <br/>"
+];
