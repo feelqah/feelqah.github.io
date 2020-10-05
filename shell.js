@@ -1,6 +1,4 @@
-/*TODO: - Add history
-        - TAB completion
-        - Add basic shell commands - pwd, cd, ls, cat
+/*TODO: - Add basic shell commands - pwd, cd, ls, cat
         - a fake file system
 */
 
@@ -132,6 +130,7 @@ $("#shell").keydown(function(e){
     }
   } /* End of Enter keypress */
 
+  /* Command History */
   else if(e.which == 38){ // arrow up (38)
       $("#shell").val(input_history[history_counter-1]);
 
@@ -147,7 +146,23 @@ $("#shell").keydown(function(e){
     }
   }
 
+  /* TAB completion */
+  else if(e.which == 9){ // TAB (9)
+    var input = $("#shell").val();
+
+    for(var i=0;i<commands.length;i++){
+      if(commands[i].includes(input)){
+        $("#shell").val(commands[i]);
+
+        $("#shell").focus();
+
+        e.preventDefault();
+      }
+    }
+  }
+
   $("#shell").get(0).scrollIntoView();
+  $("#shell").focus();
 }); /* End of main */
 
 
