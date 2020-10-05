@@ -10,7 +10,7 @@ var welcome_message = "Type in a command (or 'help' to list all supported comman
 var commands =
     [
       "help",
-      "clear" ,
+      "clear",
       "skills",
       "experience",
       "education",
@@ -24,6 +24,8 @@ var commands =
 
 var input_history = [];
 var history_counter = 0; // used for "scrolling" through history
+
+var suggestionCounter = 0; // used for tab completion
 
 var input_arguments;
 
@@ -54,9 +56,6 @@ function displayTyping(text, id="displayText", speed=5){
   clearInterval(timeoutID);
 }
 
-
-// help skills
-// TODO: argument parsing
 function parseInput(input){
   var input_arguments = input.split(" ");
 
@@ -70,14 +69,6 @@ function parseInput(input){
 
 function executeCommand(cmd, args){
   eval(cmd+"();"); // NEVER use eval (bad practice), but for this purpose it's ok
-  /*try{
-    eval(cmd+"(" + args + ");"); // NEVER use eval (bad practice), but for this purpose it's ok
-
-  } catch(error){
-    print("'" + args[0] + "': Invalid argument <br/>");
-    console.error(error);
-  }*/
-
 }
 
 function appendElement(element, id){
@@ -85,13 +76,12 @@ function appendElement(element, id){
 }
 
 function print(input){
-  $("#displayText").append(input);
+  $("#displayText").append(input + "<br/>");
 }
 
 function showElement(id){
   $("#" + id).show();
 }
-
 
 /* Main */
 
@@ -130,7 +120,7 @@ $("#shell").keydown(function(e){
     input = input.trim().toLowerCase();
 
     // Print the shell prompt
-    print("[feelqah@github ~]$ " + input + "<br/>");
+    print("[feelqah@github ~]$ " + input);
 
     if(input != ""){
       $("#shell").val("");
@@ -138,15 +128,15 @@ $("#shell").keydown(function(e){
       input_arguments = parseInput(input); // global var - input_arguments
 
       if(input_arguments == null){
-        print("'" + input.split(" ")[0] + "': Command not found<br/>");
+        print("'" + input.split(" ")[0] + "': Command not found");
       }
       else{
         executeCommand(input_arguments[0]);
       }
     }
 
-    // Clear suggestions
-    suggestions = [];
+    // used for Tab completion; reset after we hit enter
+    suggestionCounter = 0;
   } /* End of Enter keypress */
 
   /* Command History */
@@ -164,24 +154,31 @@ $("#shell").keydown(function(e){
       history_counter++;
     }
   }
-
+  // Used for Tab completion
+  else if(e.which == 32){ // space (32)
+    suggestionCounter++;
+  }
   /* TAB completion */
   else if(e.which == 9){ // TAB (9)
     var inputs = $("#shell").val().split(" ");
-    console.log(inputs);
-    if(inputs[0] != ""){
-      for(var i=0;i<inputs.length;i++){
-        for(var j=0;j<commands.length;j++){
-          if(commands[j].includes(inputs[i]) && !suggestions.includes(inputs[i])){
 
-            // Save to suggestion list
-            suggestions.push(commands[j]);
+    if(inputs != ""){
+      for(var i=0;i<commands.length;i++){
+        // the input must be a substring of a command
+        if(commands[i].includes(inputs[suggestionCounter]) && 
+          // the input word must start with the same letter as the command
+          inputs[suggestionCounter].startsWith(commands[i].slice(0,1))){
 
-            $("#shell").val(suggestions.join(" "));
-          }
+          //TODO: Fix bug when e.g.: i + tab + i
+          //TODO: Fix bug when a param is deleted and new one is entered + tab
+          $("#shell").val(function(){
+            return this.value.replace(inputs[suggestionCounter], "") + commands[i];
+          });
+          break;
         }
       }
     }
+
     $("#shell").focus();
     e.preventDefault();
   }
@@ -189,8 +186,6 @@ $("#shell").keydown(function(e){
   $("#shell").get(0).scrollIntoView();
   $("#shell").focus();
 }); /* End of main */
-
-var suggestions = [];
 
 /* command implementations */
 
@@ -201,15 +196,15 @@ function help(){
 
     for(var i=0;i<input_arguments.length;i++){
       if(commands.includes(input_arguments[i])){
-        print( "'" + input_arguments[i] + "': " + commandsInfo[input_arguments[i]] + "<br/>");
+        print( "'" + input_arguments[i] + "': " + commandsInfo[input_arguments[i]]);
       }
     }
   }
   else{
-    print("Following commands are supported:<br/>");
+    print("Following commands are supported:");
 
     for(var i=0; i < commands.length; i++){
-      print(commands[i]+"<br/>");
+      print(commands[i]);
     }
   }
 }
@@ -235,7 +230,6 @@ function projects(){
   for(var key in projectsInfo) {
     $("#displayText").append("<a href=" + projectsInfo[key] + "  target='_blank'>" + key + " </a> <br/>");
   }
-  //$("#shell").get(0).scrollIntoView();
 }
 
 function aboutme(){
@@ -250,10 +244,8 @@ function contact(){
   for(var i=0;i<contactInfo.length;i++){
     $("#displayText").append(contactInfo[i]);
   }
-  //$("#shell").get(0).scrollIntoView();
 }
 
 function resume(){
   $("#displayText").append('<a href="#" onclick="window.open(\'resume.pdf\', \'_blank\', \'fullscreen=yes\'); return false;">PDF Résumé</a> <br/>');
-  //$("#shell").get(0).scrollIntoView();
 }
