@@ -1,5 +1,6 @@
 /*TODO: - Add basic shell commands - pwd, cd, ls, cat
         - a fake file system
+        - escape html tags - XSS vuln
 */
 
 /* Messages */
@@ -9,7 +10,7 @@ var welcome_message = "Type in a command (or 'help' to list all supported comman
 var commands =
     [
       "help",
-      "clear",
+      "clear" ,
       "skills",
       "experience",
       "education",
@@ -20,8 +21,11 @@ var commands =
       "resume"
     ];
 
+
 var input_history = [];
 var history_counter = 0; // used for "scrolling" through history
+
+var input_arguments;
 
 function appendChar(char, id){
   if(char == "\n"){
@@ -50,18 +54,30 @@ function displayTyping(text, id="displayText", speed=5){
   clearInterval(timeoutID);
 }
 
+
+// help skills
 // TODO: argument parsing
 function parseInput(input){
+  var input_arguments = input.split(" ");
+
   for(var i=0; i < commands.length; i++){
-    if(input == commands[i]){
-      return input
+    if(input_arguments[0] == commands[i]){
+      return input_arguments
     }
   }
   return null
 }
 
-function executeCommand(cmd){
+function executeCommand(cmd, args){
   eval(cmd+"();"); // NEVER use eval (bad practice), but for this purpose it's ok
+  /*try{
+    eval(cmd+"(" + args + ");"); // NEVER use eval (bad practice), but for this purpose it's ok
+
+  } catch(error){
+    print("'" + args[0] + "': Invalid argument <br/>");
+    console.error(error);
+  }*/
+
 }
 
 function appendElement(element, id){
@@ -88,7 +104,7 @@ $(document).ready(function() {
 // Display welcoming message
 displayTyping(welcome_message);
 
-// Wait 2s then show shellContainer
+// Wait 0.8s then show shellContainer
 setTimeout(showElement, 800, "shellContainer");
 
 // If the user clicks anywhere in the document, focus the shell
@@ -119,15 +135,18 @@ $("#shell").keydown(function(e){
     if(input != ""){
       $("#shell").val("");
 
-      var command = parseInput(input);
+      input_arguments = parseInput(input); // global var - input_arguments
 
-      if(command == null){
-        print(input +"': Command not found<br/>");
+      if(input_arguments == null){
+        print("'" + input.split(" ")[0] + "': Command not found<br/>");
       }
       else{
-        executeCommand(command);
+        executeCommand(input_arguments[0]);
       }
     }
+
+    // Clear suggestions
+    suggestions = [];
   } /* End of Enter keypress */
 
   /* Command History */
@@ -148,33 +167,51 @@ $("#shell").keydown(function(e){
 
   /* TAB completion */
   else if(e.which == 9){ // TAB (9)
-    var input = $("#shell").val();
+    var inputs = $("#shell").val().split(" ");
+    console.log(inputs);
+    if(inputs[0] != ""){
+      for(var i=0;i<inputs.length;i++){
+        for(var j=0;j<commands.length;j++){
+          if(commands[j].includes(inputs[i]) && !suggestions.includes(inputs[i])){
 
-    for(var i=0;i<commands.length;i++){
-      if(commands[i].includes(input)){
-        $("#shell").val(commands[i]);
+            // Save to suggestion list
+            suggestions.push(commands[j]);
 
-        $("#shell").focus();
-
-        e.preventDefault();
+            $("#shell").val(suggestions.join(" "));
+          }
+        }
       }
     }
+    $("#shell").focus();
+    e.preventDefault();
   }
 
   $("#shell").get(0).scrollIntoView();
   $("#shell").focus();
 }); /* End of main */
 
+var suggestions = [];
 
 /* command implementations */
 
 function help(){
-  print("Following commands are supported:<br/>");
+  if(input_arguments.length > 1){
+    input_arguments = input_arguments.slice(1); // remove the command name
+    var counter = 0;
 
-  for(var i=0; i < commands.length; i++){
-    print(commands[i]+"<br/>");
+    for(var i=0;i<input_arguments.length;i++){
+      if(commands.includes(input_arguments[i])){
+        print( "'" + input_arguments[i] + "': " + commandsInfo[input_arguments[i]] + "<br/>");
+      }
+    }
   }
-  //$("#shell").get(0).scrollIntoView();
+  else{
+    print("Following commands are supported:<br/>");
+
+    for(var i=0; i < commands.length; i++){
+      print(commands[i]+"<br/>");
+    }
+  }
 }
 
 function clear(){

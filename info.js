@@ -1,3 +1,17 @@
+
+var commandsInfo = {
+      "help": "Shows list of implemented commands or info about a specific command.",
+      "clear": "Clears the screen.",
+      "skills": "Shows a list of my skills.",
+      "experience": "Shows a list of my working experience.",
+      "education": "Shows a list of my education information.",
+      "projects": "Shows a list of projects that I'm working on currently.",
+      "aboutme": "Shows a short summary about me.",
+      "interests": "Shows a list of my interests.",
+      "contact": "Let's get in touch.",
+      "resume": "Shows a link to my PDF Résumé."
+};
+
 /* Resume information*/
 
 var skillsInfo = "• C language\n" +
