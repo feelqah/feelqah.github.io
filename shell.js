@@ -22,6 +22,9 @@ var commands =
       "resume"
     ];
 
+var input_history = [];
+var history_counter = 0; // used for "scrolling" through history
+
 function appendChar(char, id){
   if(char == "\n"){
     $("#" + id).append("<br/>");
@@ -95,12 +98,22 @@ $(document).click(function(){
   $("#shell").focus();
 });
 
-// On keypress check for enter key (13)
-$("#shell").keypress(function(e){
-  if(e.which == 13){
-    $("#shell").focus();
+// On keydown event check for:
+$("#shell").keydown(function(e){
+
+  $("#shell").focus();
+
+  if(e.which == 13){ // enter key (13)
     // Get the string from input and trim it
-    var input = $("#shell").val().trim().toLowerCase();
+    var input = $("#shell").val();
+
+    // Save the command history
+    input_history.push(input);
+
+    history_counter = input_history.length;
+
+    // Trim and lower case the input
+    input = input.trim().toLowerCase();
 
     // Print the shell prompt
     print("[feelqah@github ~]$ " + input + "<br/>");
@@ -117,10 +130,25 @@ $("#shell").keypress(function(e){
         executeCommand(command);
       }
     }
+  } /* End of Enter keypress */
 
+  else if(e.which == 38){ // arrow up (38)
+      $("#shell").val(input_history[history_counter-1]);
+
+      if(history_counter-1 > 0){
+        history_counter--;
+      }
   }
-}); /* End of main */
+  else if(e.which == 40){ // arrow down (40)
+    $("#shell").val(input_history[history_counter-1]);
 
+    if(history_counter < input_history.length){
+      history_counter++;
+    }
+  }
+
+  $("#shell").get(0).scrollIntoView();
+}); /* End of main */
 
 
 /* command implementations */
@@ -131,7 +159,7 @@ function help(){
   for(var i=0; i < commands.length; i++){
     print(commands[i]+"<br/>");
   }
-  $("#shell").get(0).scrollIntoView();
+  //$("#shell").get(0).scrollIntoView();
 }
 
 function clear(){
@@ -155,7 +183,7 @@ function projects(){
   for(var key in projectsInfo) {
     $("#displayText").append("<a href=" + projectsInfo[key] + "  target='_blank'>" + key + " </a> <br/>");
   }
-  $("#shell").get(0).scrollIntoView();
+  //$("#shell").get(0).scrollIntoView();
 }
 
 function aboutme(){
@@ -170,10 +198,10 @@ function contact(){
   for(var i=0;i<contactInfo.length;i++){
     $("#displayText").append(contactInfo[i]);
   }
-  $("#shell").get(0).scrollIntoView();
+  //$("#shell").get(0).scrollIntoView();
 }
 
 function resume(){
   $("#displayText").append('<a href="#" onclick="window.open(\'resume.pdf\', \'_blank\', \'fullscreen=yes\'); return false;">PDF Résumé</a> <br/>');
-  $("#shell").get(0).scrollIntoView();
+  //$("#shell").get(0).scrollIntoView();
 }
