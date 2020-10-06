@@ -135,3 +135,28 @@ var contactInfo = [
   "email: <a href='mailto:fmaric.os@gmail.com'>fmaric.os@gmail.com</a><br/>",
   "phone: +385976472678 <br/>"
 ];
+
+
+var specs =
+"<pre>" +
+"                   -`                    filkatron@github\n" +
+"                  .o+`                   OS: Arch Linux\n" +
+"                 `ooo/                   Kernel: x86_64 Linux 5.8.13-arch1-1\n" +
+"                `+oooo:                  Uptime: 1h 7m\n" +
+"               `+oooooo:                 Packages: 622\n" +
+"               -+oooooo+:                Shell: bash 5.0.18\n" +
+"             `/:-:++oooo+:               Resolution: 1920x1080\n" +
+"            `/++++/+++++++:              WM: i3\n" +
+"           `/++++++++++++++:             GTK Theme: Adwaita [GTK3]\n" +
+"          `/+++ooooooooooooo/`           Disk: 10G / 454G (3%)\n" +
+"         ./ooosssso++osssssso+`          CPU: Intel Pentium G860 @ 2x 3GHz [36.0°C]\n" +
+"        .oossssso-````/ossssss+`         GPU: AMD/ATI Cape Verde PRO [Radeon HD 7750/8740 / R7 250E]\n" +
+"       -osssssso.      :ssssssso.        RAM: 1145MiB / 7851MiB\n" +
+"      :osssssss/        osssso+++.\n" +
+"     /ossssssss/        +ssssooo/-\n" +
+"   `/ossssso+/:-        -:/+osssso+-\n" +
+"  `+sso+:-`                 `.-/+oso:\n" +
+" `++:.                           `-/+/\n" +
+" .`                                 `"
+"</pre>";
+ 

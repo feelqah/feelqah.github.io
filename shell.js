@@ -11,6 +11,8 @@ var commands =
     [
       "help",
       "clear",
+      "screenfetch",
+
       "skills",
       "experience",
       "education",
@@ -27,7 +29,7 @@ var history_counter = 0; // used for "scrolling" through history
 
 var suggestionCounter = 0; // used for tab completion
 
-var input_arguments;
+var input_arguments; // global variable for command arguments
 
 function appendChar(char, id){
   if(char == "\n"){
@@ -248,4 +250,8 @@ function contact(){
 
 function resume(){
   $("#displayText").append('<a href="#" onclick="window.open(\'resume.pdf\', \'_blank\', \'fullscreen=yes\'); return false;">PDF Résumé</a> <br/>');
+}
+
+function screenfetch(){
+  print(specs);
 }
