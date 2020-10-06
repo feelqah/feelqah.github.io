@@ -139,7 +139,7 @@ var contactInfo = [
 
 var specs =
 "<pre>" +
-"                   -`                    filkatron@github\n" +
+"                   -`                    feelqah@github\n" +
 "                  .o+`                   OS: Arch Linux\n" +
 "                 `ooo/                   Kernel: x86_64 Linux 5.8.13-arch1-1\n" +
 "                `+oooo:                  Uptime: 1h 7m\n" +
