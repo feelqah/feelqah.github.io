@@ -1,6 +1,7 @@
 /*TODO: - Add basic shell commands - pwd, cd, ls, cat
         - Hide shell while commands are being executed
         - escape html tags - XSS vuln
+        - refactor - create smaller/more readable functions
 */
 
 /* Messages */
@@ -85,7 +86,6 @@ function appendElement(element, id){
 }
 
 function print(input){
-  console.log(input.replace("\n", "<br/>"));
   $("#displayText").append(input.replaceAll("\n", "<br/>") + "<br/>");
 }
 
@@ -130,7 +130,12 @@ $("#shell").keydown(function(e){
     input = input.trim().toLowerCase();
 
     // Print the shell prompt
-    print("[feelqah@github ~]$ " + input);
+    if(whereWeAt == locations[2]){ // home dir of username
+      print("[feelqah@github ~]$ " + input);
+    }
+    else{
+      print("feelqah@github " + whereWeAt + "]" + input);
+    }
 
     if(input != ""){
       $("#shell").val("");
@@ -196,28 +201,29 @@ $("#shell").keydown(function(e){
   /* TAB completion */
   else if(e.which == 9){ // TAB (9)
     var input = $("#shell").val();
-    var inputs = $("#shell").val().split(" ");
+    var inputs = input.split(" ");
 
     if(inputs != ""){
       if(input.includes("./") && whereWeAt == locations[2]){
         $("#shell").val("./resume.sh");
       }
-    else{
-      for(var i=0;i<commands.length;i++){
-        // the input must be a substring of a command
-        if(commands[i].includes(inputs[suggestionCounter]) && 
-          // the input word must start with the same letter as the command
-          inputs[suggestionCounter].startsWith(commands[i].slice(0,1))){
+      // TODO: else if: handle existing paths (/home, /home/feelqah)
+      else{
+        for(var i=0;i<commands.length;i++){
+          // the input must be a substring of a command
+          if(commands[i].includes(inputs[suggestionCounter]) && 
+            // the input word must start with the same letter as the command
+            inputs[suggestionCounter].startsWith(commands[i].slice(0,1))){
 
-          //TODO: Fix bug when e.g.: i + tab + i
-          //TODO: Fix bug when a param is deleted and new one is entered + tab
-          $("#shell").val(function(){
-            return this.value.replace(inputs[suggestionCounter], "") + commands[i];
-          });
-          break;
+            //TODO: Fix bug when e.g.: i + tab + i
+            //TODO: Fix bug when a param is deleted and new one is entered + tab
+            $("#shell").val(function(){
+              return this.value.replace(inputs[suggestionCounter], "") + commands[i];
+            });
+            break;
+          }
         }
       }
-    }
     }
 
     $("#shell").focus();
@@ -296,7 +302,32 @@ function screenfetch(){
 }
 
 function ls(){
-  if(whereWeAt == locations[2]){ // "username dir / ~"
+  if(whereWeAt == locations[2] && input_arguments.length == 1){ // "username dir / ~"
     print("resume.sh");
+  }
+  else if(input_arguments.length == 2){
+    if(input_arguments[1] in files){
+      print(files[input_arguments[1]].join(" "));
+    }
+    else if(input_arguments[1].includes("/")){
+
+      //TODO: handle /home, /home/feelqah with a more "dynamic way"
+
+      if(input_arguments[1].includes("home") || input_arguments[1].includes("feelqah")){
+
+        var dirs = input_arguments[1].split("/");
+
+        print(files[dirs[dirs.length-1]].join(" "));
+      }
+      else{
+        print("Do you really think this is a real shell?");
+      }
+    }
+    else{
+      print("No such directory!");
+    }
+  }
+  else{
+    print("Sorry can't take more than one arg at a time right now...");
   }
 }
