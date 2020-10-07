@@ -67,7 +67,7 @@ var experienceInfo =
 "LLVM Project\n" +
 "The LLVM compiler infrastructure project is a collection of modular andreusable compiler and toolchain technologies used for developingcompiler frontends and backends\n" +
 "• Implementing and maintaining LLVM support for MIPS and microMIPS processors\n" +
-"• Transling the MIPS ISA (Instruction Set Architecture) to LLVM’s tableGen language\n" +
+"• Translating the MIPS ISA (Instruction Set Architecture) to LLVM’s tableGen language\n" +
 "• Implementing MIPS instructions to the LLVM backend\n" +
 
 
@@ -110,7 +110,7 @@ var projectsInfo = {
   "Website Spell Checker for Croatian websites": "https://github.com/feelqah/CroSiteSpellCheck"
 };
 
-var aboutmeInfo = "\nEmbedded Software Engineer from Osijek, Croatia, with 5 years experience in Embedded and Automotive field and\n" +
+var aboutmeInfo = "Embedded Software Engineer from Osijek, Croatia, with 5 years experience in Embedded and Automotive field and\n" +
   "an extensive range of skills including software development, debugging, task automation and software testing.\n" +
   "\nAlso, I volunteer at a local dog shelter and try to live eco-friendly as possible with a DIY mindset \n" +
   "(always trying to build stuff from scratch, no matter the field).\n";
@@ -132,7 +132,7 @@ var interestsInfo =
 "• Activism\n";
 
 var contactInfo = [
-  "email: <a href='mailto:fmaric.os@gmail.com'>fmaric.os@gmail.com</a><br/>",
+  "email: <a href='mailto :fmaric.os@gmail.com'>fmaric.os@gmail.com</a><br/>",
   "phone: +385976472678 <br/>"
 ];
 
@@ -159,4 +159,9 @@ var specs =
 " `++:.                           `-/+/\n" +
 " .`                                 `"
 "</pre>";
- 
+
+var files = {
+  "/" : ["bin", "dev", "home", "lib64", "media", "opt", "root", "sbin", "sys", "usr", "boot", "etc", "lib", "lost+found", "mnt", "proc", "run", "srv", "tmp", "var"],
+  "home" : ["feelqah"],
+  "feelqah" : ["resume.sh"]
+};

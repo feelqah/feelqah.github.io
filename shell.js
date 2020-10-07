@@ -1,5 +1,5 @@
 /*TODO: - Add basic shell commands - pwd, cd, ls, cat
-        - a fake file system
+        - Hide shell while commands are being executed
         - escape html tags - XSS vuln
 */
 
@@ -12,6 +12,7 @@ var commands =
       "help",
       "clear",
       "screenfetch",
+      "ls",
 
       "skills",
       "experience",
@@ -30,6 +31,12 @@ var history_counter = 0; // used for "scrolling" through history
 var suggestionCounter = 0; // used for tab completion
 
 var input_arguments; // global variable for command arguments
+
+
+var locations = ["/", "home", "feelqah", ""];
+
+var whereWeAt = locations[2]; // global var for current location
+
 
 function appendChar(char, id){
   if(char == "\n"){
@@ -78,7 +85,8 @@ function appendElement(element, id){
 }
 
 function print(input){
-  $("#displayText").append(input + "<br/>");
+  console.log(input.replace("\n", "<br/>"));
+  $("#displayText").append(input.replaceAll("\n", "<br/>") + "<br/>");
 }
 
 function showElement(id){
@@ -110,7 +118,7 @@ $("#shell").keydown(function(e){
   $("#shell").focus();
 
   if(e.which == 13){ // enter key (13)
-    // Get the string from input and trim it
+    // Get the string from input 
     var input = $("#shell").val();
 
     // Save the command history
@@ -129,7 +137,32 @@ $("#shell").keydown(function(e){
 
       input_arguments = parseInput(input); // global var - input_arguments
 
-      if(input_arguments == null){
+      if(input == "./resume.sh"){ // print the whole resume
+        print("About me:");
+        print(aboutmeInfo);
+
+        print("Working experience:");
+        print(experienceInfo);
+
+        print("Education:");
+        print(educationInfo);
+
+        print("Skills:");
+        print(skillsInfo)
+
+        print("Projects I'm currently working on:");
+        projects();
+
+        print("Interests:");
+        print(interestsInfo);
+
+        print("How to contact me:");
+        contact();
+
+        print("Résumé in PDF");
+        resume();
+      }
+      else if(input_arguments == null){
         print("'" + input.split(" ")[0] + "': Command not found");
       }
       else{
@@ -162,9 +195,14 @@ $("#shell").keydown(function(e){
   }
   /* TAB completion */
   else if(e.which == 9){ // TAB (9)
+    var input = $("#shell").val();
     var inputs = $("#shell").val().split(" ");
 
     if(inputs != ""){
+      if(input.includes("./") && whereWeAt == locations[2]){
+        $("#shell").val("./resume.sh");
+      }
+    else{
       for(var i=0;i<commands.length;i++){
         // the input must be a substring of a command
         if(commands[i].includes(inputs[suggestionCounter]) && 
@@ -179,6 +217,7 @@ $("#shell").keydown(function(e){
           break;
         }
       }
+    }
     }
 
     $("#shell").focus();
@@ -215,7 +254,6 @@ function clear(){
   $("#displayText").empty();
 }
 
-// TODO: Hide shell while messages are being displayed!
 function skills(){
   displayTyping(skillsInfo);
 }
@@ -246,6 +284,7 @@ function contact(){
   for(var i=0;i<contactInfo.length;i++){
     $("#displayText").append(contactInfo[i]);
   }
+  $("#displayText").append("<br/>");
 }
 
 function resume(){
@@ -254,4 +293,10 @@ function resume(){
 
 function screenfetch(){
   print(specs);
+}
+
+function ls(){
+  if(whereWeAt == locations[2]){ // "username dir / ~"
+    print("resume.sh");
+  }
 }
