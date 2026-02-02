@@ -113,6 +113,12 @@ a:hover {
   border-left: 4px solid #003311;
 }
 
+#kbd {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
 .terminal {
   position: relative;
   box-shadow: 0 0 20px rgba(0,255,102,0.15);

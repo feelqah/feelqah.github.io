@@ -145,37 +145,26 @@ async function runCommand(cmd) {
   isRunning = false;
 }
 
+const kbd = document.getElementById("kbd");
 
-document.addEventListener("keydown", async e => {
-  if (isRunning) return;
+kbd.addEventListener("input", () => {
+  currentInput = kbd.value;
+  inputEl.textContent = currentInput;
+});
 
-  if (e.key === "Backspace") {
-    currentInput = currentInput.slice(0, -1);
-  }
-  else if (e.key === "Enter") {
+kbd.addEventListener("keydown", async e => {
+  if (e.key === "Enter") {
+    e.preventDefault();
     const cmd = currentInput;
     currentInput = "";
+    kbd.value = "";
     inputEl.textContent = "";
     await runCommand(cmd);
   }
-  else if (e.key === "ArrowUp") {
-    if (historyIndex > 0) historyIndex--;
-    currentInput = history[historyIndex] || "";
-  }
-  else if (e.key === "ArrowDown") {
-    if (historyIndex < history.length - 1) historyIndex++;
-    else currentInput = "";
-    currentInput = history[historyIndex] || "";
-  }
-  else if (e.key === "Tab") {
-    e.preventDefault();
-    autocomplete();
-  }
-  else if (e.key.length === 1) {
-    currentInput += e.key;
-  }
+});
 
-  inputEl.textContent = currentInput;
+document.querySelector(".terminal").addEventListener("click", () => {
+  kbd.focus();
 });
 
 function autocomplete() {
