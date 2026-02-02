@@ -48,6 +48,18 @@ a:hover {
   justify-content: center;
 }
 
+.logo-pic {
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+.logo-pic img {
+  max-width: 100%;
+  height: auto;
+  image-rendering: pixelated; /* keeps it crispy if it's pixel-style */
+  filter: drop-shadow(0 0 6px rgba(0,255,102,0.4));
+}
+
 .section-title {
   text-align: center;
   color: #66ff99;
