@@ -1,3 +1,5 @@
+![Alt text](imgs/logo.png "logo")
+
 # segfault hackzine
 
 segfault is a minimalistic phrack like copy, community driven hacker zine for the curious and the bored, the ones who refuse to accept the surface of things.
