@@ -49,14 +49,14 @@ a:hover {
 }
 
 .logo-pic {
-  text-align: center;
-  margin-bottom: 16px;
+  display: flex;
+  justify-content: center;
 }
 
 .logo-pic img {
   max-width: 100%;
   height: auto;
-  image-rendering: pixelated; /* keeps it crispy if it's pixel-style */
+  image-rendering: pixelated;
   filter: drop-shadow(0 0 6px rgba(0,255,102,0.4));
 }
 
