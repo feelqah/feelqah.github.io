@@ -1,4 +1,4 @@
-![Alt text](imgs/logo.png "logo")
+![logo](imgs/logo.png "logo")
 
 # segfault hackzine
 

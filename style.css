@@ -1,0 +1,176 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 14px;
+  background: #000000;
+  color: #00ff66;
+  font-family: "Courier New", Courier, monospace;
+  line-height: 1.5;
+  max-width: 960px;
+  margin: auto;
+}
+
+a {
+  color: #66ff99;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+.top-nav {
+  text-align: center;
+  margin-bottom: 12px;
+  font-size: 14px;
+}
+
+.top-nav a {
+  color: #00ff66;
+}
+
+.logo pre,
+.ascii {
+  background: #000000;
+  color: #00ff66;
+  padding: 12px;
+  border-top: 2px solid #003311;
+  border-bottom: 2px solid #003311;
+  margin-bottom: 16px;
+}
+
+.logo {
+  display: flex;
+  justify-content: center;
+}
+
+.section-title {
+  text-align: center;
+  color: #66ff99;
+  margin: 14px 0 10px;
+}
+
+.issue-grid {
+  text-align: center;
+  margin-bottom: 10px;
+  color: #00aa44;
+}
+
+.current-issue {
+  background: #001a0d;
+  color: #66ff99;
+  padding: 6px;
+  border: 1px solid #003311;
+  font-size: 14px;
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.article-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 6px;
+}
+
+.article-table tr:nth-child(odd) {
+  background: #000f08;
+}
+
+.article-table tr:nth-child(even) {
+  background: #001a0d;
+}
+
+.article-table td {
+  padding: 6px;
+  color: #00ff66;
+}
+
+.article-table .author {
+  text-align: right;
+  color: #00aa44;
+}
+
+.content {
+  background: #000000;
+  padding: 14px;
+  border-left: 4px solid #003311;
+}
+
+.terminal {
+  position: relative;
+  box-shadow: 0 0 20px rgba(0,255,102,0.15);
+  background: #000000;
+  border: 2px solid #003311;
+  padding: 10px;
+}
+
+.terminal::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(255,255,255,0.02),
+    rgba(255,255,255,0.02) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+}
+
+#output {
+  min-height: 200px;
+  max-height: 60vh;
+  overflow-y: auto;
+  color: #00ff66;
+  white-space: pre-wrap;
+  font-size: 14px;
+  line-height: 1.4;
+  text-shadow: 0 0 4px rgba(0,255,102,0.4);
+}
+
+input {
+  background: none;
+  border: none;
+  outline: none;
+  color: #00ff66;
+  font-family: inherit;
+  flex: 1;
+}
+
+.input-line {
+  display: flex;
+  gap: 8px;
+}
+
+.prompt {
+  color: #66ff99;
+}
+
+.cmd {
+  color: #99ffcc;
+}
+
+.back {
+  display: inline-block;
+  margin-top: 16px;
+}
+
+.cursor {
+  animation: blink 1s steps(2) infinite;
+}
+
+@keyframes blink {
+  0% { opacity: 1; }
+  50% { opacity: 0; }
+  100% { opacity: 1; }
+}
+
