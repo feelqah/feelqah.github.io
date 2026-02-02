@@ -2,7 +2,7 @@
 
 # segfault hackzine
 
-segfault is a minimalistic phrack like copy, community driven hacker zine for the curious and the bored, the ones who refuse to accept the surface of things.
+segfault is a minimalistic Phrack-like copy, community driven hacker zine for the curious and the bored, the ones who refuse to accept the surface of things.
 The ones who ask why, how, and what happens if I flip this bit. The ones who seek after knowledge.
 
 This is a space for people who learn by breaking, reversing, and thinking outside the box.
