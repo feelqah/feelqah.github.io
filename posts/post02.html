@@ -26,10 +26,157 @@
 </div>
 
 <pre class="content">
-date: 2026-02-xx
+date: 2026-02-05
 author: feelqah
 
-Comming soon...
+# Introduction
+  This is a short post about how to write a pretty stupid GIF fuzzer for your
+  Stock Android Gallery app. This is in no way a proper fuzzer, hence the
+  "low-tech" in the title. Fuzzers are fast, this one is slow af.
+
+  The idea is simple:
+    1. Generate a random GIF image that contains garbage (with FormatFuzzer)
+    2. Send it over to your phone via ADB
+    3. Open the GIF image in the Gallery App
+    4. Monitor logcat via ADB to check for crashes
+    5. In case of a crash, save the tombstone for later inspection
+
+  As you can imagine this is quite slow (2 seconds per image), but I did
+  manage to find a bug in a popular Android OEM Gallery app, inside its native
+  GIF parsing library.
+
+  Haven't tested this against other OEM Gallery apps yet (soon.jpg),
+  but if it also relies on JNI (Java Native Interface) to invoke custom C/C++
+  parsing code, there's a chance similar bugs might show up there as well.
+
+  This approach can be applied in the same way to other image and video formats
+  as well. But it's more of a lottery than anything else.
+  I'm also planning to write a post on how to actually fuzz native Android
+  libraries using Frida and AFL++ once I find the time to experiment.
+
+
+# Short intro to GIFs
+  GIF (Graphics Interchange Format) is an old but still widely supported bitmap
+  image format originally introduced by CompuServe in 1987. A GIF stores pixels
+  using an indexed color palette (up to 256 colors per frame) and supports
+  multiple frames, which is why it's commonly used for simple animations.
+
+  GIF data is compressed using LZW, a lossless data compression technique,
+  which makes the decoder logic stateful and error-prone (if the implementation
+  is sloppy, like in this case).
+
+  Example structure of a GIF file:
+
+    +-----------------------------+
+    | Header                      |  "GIF87a" / "GIF89a"
+    +-----------------------------+
+    | Logical Screen Descriptor   |  screen width/height, etc
+    +-----------------------------+
+    | Global Color Table          |  up to 256 colors
+    +-----------------------------+
+    | Graphic Control Extension   |
+    +-----------------------------+
+    |Image Descriptor             |
+    +-----------------------------+
+    | Image Data                  |
+    +-----------------------------+
+    | Trailer                     |  0x3B
+    +-----------------------------+
+
+  For more information check the internet, or part2 of this post, where we'll
+  discuss debugging the GIF parser.
+
+
+# Requirements
+  On your PC:
+    - Python3
+    - adb
+    - FormatFuzzer
+
+  On your phone:
+    - USB debugging enabled
+    - your phone has to be rooted in order to obtain the tombstone, at least
+        this was true in my case, I couldn't access the /data/tombstones dir.
+        But the fuzzer will detect the crash via logcat even if not rooted.
+
+  and a USB cable.
+
+
+# Instructions
+  Clone and install FormatFuzzer from https://github.com/uds-se/FormatFuzzer
+  The instructions are pretty clear, so I won't write them here.
+  Just be sure to build the gif-fuzzer.
+
+  Download the Android SDK Platform Tools from:
+    https://developer.android.com/tools/releases/platform-tools
+
+  Unzip the dir, and copy the binaries to: /usr/local/bin
+
+  Enable USB Debugging on your phone, if you don't know how to, google it.
+  Connect the phone via usb to the pc.
+
+  When you insert the usb, on your phone pick the File Transfer option, and
+  authorize the device.
+
+  If for some reason you can't see the File Transfer option, you probably have
+  a USB cable that only chargers your device, no data lines, find another one.
+
+  Then check if adb lists your device with:
+    <i>adb devices</i>
+  It should show something like:
+    <i>List of devices attached
+    ijaufejrnjvwt8lj	device</i>
+
+  Now we can run the fuzzer.
+  The "fuzzer" is a simple python script that just calls a bunch of adb commands.
+  Just change the top vars to reflect your paths and run the script:
+    <i>python3 fuzz_gallery.py</i>
+
+  When you run it the first time, I recommend setting the TIMEOUT variable to 10.
+  This will allow you to select the default application to open the file on your phone.
+  Choose the one you want to test.
+
+  Then run the fuzzer and wait. Protip: leave it over night.
+  If you get lucky, you'll maybe find something.
+
+  You can find the <a href="https://github.com/feelqah/feelqah.github.io/tree/master/appendix/scripts/fuzz_gallery.py" target="_blank">script</a> in the repo of this github page.
+
+  Note:
+    if your device isn't rooted the script will throw an error, when it tries to
+    pull the tombstone to your pc:
+      <i>adb: error: failed to stat remote object '/data/tombstones/tombstone_12': Permission denied </i>
+
+    It's best to use a rooted phone for this, and for later debugging of the issue.
+
+
+# Tombstone
+  Tombstones are crash reports generated directly on the device when
+  a native crash occurs.
+
+  Here is a redacted snippet of what the tombstone contained:
+  <i>
+    -SNIP-
+
+    signal 11 (SIGSEGV), code 2 (SEGV_ACCERR), fault addr 0xXXXXXXXXXXXXXXX
+
+    registers:
+      x0  ...  x1  ...  x2  ...  x3  ...
+      ...
+      pc  0xXXXXXXXXXXXXXXX  lr  0xXXXXXXXXXXXXXXX  sp  0xXXXXXXXXXXXXXXX
+
+    backtrace:
+      #00 pc 0xXXXXXXXX  /data/app/.../lib/arm64/libXXX.so (xxx+0xXXX)
+      #01 pc 0xXXXXXXXX  /data/app/.../lib/arm64/libXXX.so (Java_com_xxx_xxx+0xXX)
+      #02 pc 0xXXXXXXXX  /apex/.../libc.so (__pthread_start+0xXX)
+      #03 pc 0xXXXXXXXX  /apex/.../libc.so (__start_thread+0xXX)
+
+    -SNIP-</i>
+
+This was the easy and lucky part. The hard part is debugging this bug, and seeing
+if it is exploitable.
+
+I'll cover that in another post, part2 of this one, where we'll use frida, gdb,
+jdax and ghidra to inspect the .so file and start debugging.
 </pre>
 
 <a class="back" href="../index.html">← back</a>
