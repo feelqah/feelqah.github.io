@@ -14,6 +14,7 @@ available commands:
   ls          list files
   about       about me
   books       my favorite computer books
+  screenfetch pc and os info
   echo <txt>  print text
   clear       clear screen
   exit        back to main site
@@ -80,7 +81,25 @@ books:
 - The Web Application Hacker's Handbook - Stuttard & Pinto
 `;
   },
-  
+  screenfetch() {
+    return `
+
+f@kek
+OS: Arch Linux
+Kernel: x86_64 Linux 6.18.7-arch1-1
+Uptime: 7h 53m
+Packages: 810
+Shell: zsh 5.9
+Resolution: No X Server
+WM: i3
+GTK Theme: Adwaita [GTK3]
+Disk: 64G / 307G (22%)
+CPU: Intel Core i5-2520M @ 4x 3.2GHz [53.0°C]
+GPU: Intel Corporation 2nd Generation Core Processor Family
+RAM: 2816MiB / 15870MiB
+    `
+  },
+
   exit() {
   window.location.href = "index.html";
   return "";
