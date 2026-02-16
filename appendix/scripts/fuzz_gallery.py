@@ -61,9 +61,11 @@ finally:
 
 print("\nPulling {tombstone_file} to pc...")
 
-ret = subprocess.run(["adb", "pull", f"{tombstone_file}", "."], check=False)
-if not ret.returncode:
-    print(f"\nSaved in current path under: {tombstone_file}.")
+with open(tombstone_file, "wb") as f:
+    ret = subprocess.run(['adb', 'shell', 'su', '-c', f'cat /data/tombstones/{tombstone_file}'],
+                            stdout=f, stderr=subprocess.PIPE, check=False)
+    if not ret.returncode:
+        print(f"\nSaved in current path under: {tombstone_file}")
 
 print("\nCopying the image that the crash, to the current dir...")
 subprocess.run(f"cp {GIF_DIR}/{FILE_NAME} {FILE_NAME}", shell=True, check=False)
