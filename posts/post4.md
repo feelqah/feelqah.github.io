@@ -1,31 +1,8 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en">
-
-<head>
-  <link rel="icon" type="image/png" sizes="32x32" href="../favicon/favicon-32x32.png">
-  <link rel="icon" type="image/png" sizes="16x16" href="../favicon/favicon-16x16.png">
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>.: Cheap Rogue BTS :.</title>
-  <link rel="stylesheet" href="../style.css">
-</head>
-<body>
-
-<div class="top-nav">
-[ <a href="../index.html">Posts</a> ]
-[ <a href="../about.html">About</a> ]
-</div>
-
-<div class="ascii">
-<pre>
----------------------------------------------------------------------
+----------------------------------------------------------------------
 | Fuzzing Android Native Libraries with AFL++ QEMU Persistent Mode  |
----------------------------------------------------------------------
-</pre>
-</div>
+----------------------------------------------------------------------
 
-<pre class="content">
+
 date: 2026-03-23
 author: feelqah
 
@@ -89,9 +66,9 @@ author: feelqah
   binary-only cross-architecture target, it's the best option available.
 
   For details on how QEMU mode works internally see:
-    * AFL++ QEMU mode README: https://github.com/AFLplusplus/AFLplusplus/blob/stable/qemu_mode/README.md
-    * How it works under the hood: https://galtashma.com/posts/how-fuzzing-with-qemu-and-afl-work
-    * AFL++ approach (edge coverage algorithm): https://aflplus.plus/docs/afl-fuzz_approach/
+    * AFL++ QEMU mode README: <a href="https://github.com/AFLplusplus/AFLplusplus/blob/stable/qemu_mode/README.md" target="_blank">link</a>
+    * How it works under the hood: <a href="https://galtashma.com/posts/how-fuzzing-with-qemu-and-afl-work" target="_blank">link</a>
+    * AFL++ approach (edge coverage algorithm): <a href="https://aflplus.plus/docs/afl-fuzz_approach/" target="_blank">link</a>
 
 
 # What is Persistent Mode?
@@ -109,9 +86,9 @@ author: feelqah
   addresses.
 
   For details on how Persistent Mode mode works see:
-    * AFL++ persistent mode README: https://github.com/AFLplusplus/AFLplusplus/blob/stable/qemu_mode/README.persistent.md
-    * AFL++ env variables: https://aflplus.plus/docs/env_variables/
-    * Airbus SecLab walkthrough: https://airbus-seclab.github.io/AFLplusplus-blogpost/
+    * AFL++ persistent mode README: <a href="https://github.com/AFLplusplus/AFLplusplus/blob/stable/qemu_mode/README.persistent.md" target="_blank">link</a>
+    * AFL++ env variables: <a href="https://aflplus.plus/docs/env_variables/" target="_blank">link</a>
+    * Airbus SecLab walkthrough: <a href="https://airbus-seclab.github.io/AFLplusplus-blogpost/" target="_blank">link</a>
 
 
 # The Target: libmigalleryffmpeg.so
@@ -404,7 +381,8 @@ author: feelqah
   For reference, Google's OSS-Fuzz targets individual FFmpeg decoders
   and demuxers separately for depth. Our approach trades that depth
   for breadth, one input exercises the entire stack.
-  https://github.com/google/oss-fuzz/blob/master/projects/ffmpeg/build.sh
+  <a href="https://github.com/google/oss-fuzz/blob/master/projects/ffmpeg/build.sh" target="_blank">ffmpeg/build.sh</a>
+
 
   ## Why we can fuzz FFmpeg directly
   The Frida trace shows the app calls standard FFmpeg public API
@@ -452,7 +430,8 @@ author: feelqah
     The AFL_QEMU_FORCE_DFL tip comes from Andrea Fioraldi (author of
     qemuafl). The full procedure is documented in Conviso AppSec's
     Android fuzzing tutorial:
-    https://blog.convisoappsec.com/introduction-to-fuzzing-android-native-components/
+    <a href="https://blog.convisoappsec.com/introduction-to-fuzzing-android-native-components/" target="_blank">fuzzing-android-native-components</a>
+
 
     Apply the patch before building QEMU:
     1. Comment out signal_init() in qemu_mode/qemuafl/linux-user/main.c:
@@ -1025,9 +1004,3 @@ author: feelqah
   source code.
 
   Let it run. Wait. Maybe it finds some crashes.
-</pre>
-
-<a class="back" href="../index.html">← back</a>
-
-</body>
-</html>
