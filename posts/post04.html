@@ -29,7 +29,6 @@
 date: 2026-03-23
 author: feelqah
 
-
 # Introduction
   This post walks you through how to fuzz a closed-source Android native library
   using AFL++ in QEMU persistent mode, on a regular x86_64 Linux machine.
@@ -375,42 +374,42 @@ author: feelqah
   The file gets closed and all resources are freed.
 
   ## What we learned
-  The Frida trace gives us the real pipeline. The app calls these FFmpeg
-  functions in this order for a single video playback:
+    The Frida trace gives us the real pipeline. The app calls these FFmpeg
+    functions in this order for a single video playback:
 
-    avformat_open_input          open file, probe container format
-    avformat_find_stream_info    identify streams, trial-decode
-    avcodec_find_decoder         pick the right decoder
-    avcodec_open2                initialize the decoder
-    av_read_frame                read packets from the container
-    avcodec_send_packet          feed packet to decoder
-    avcodec_receive_frame        get decoded frame back
-    avformat_close_input         close file, free resources
+      avformat_open_input          open file, probe container format
+      avformat_find_stream_info    identify streams, trial-decode
+      avcodec_find_decoder         pick the right decoder
+      avcodec_open2                initialize the decoder
+      av_read_frame                read packets from the container
+      avcodec_send_packet          feed packet to decoder
+      avcodec_receive_frame        get decoded frame back
+      avformat_close_input         close file, free resources
 
-  This is the standard FFmpeg decode pipeline. The app doesn't do
-  anything exotic. It opens the file, probes it, sets up a decoder,
-  reads packets, decodes them, and cleans up.
+    This is the standard FFmpeg decode pipeline. The app doesn't do
+    anything exotic. It opens the file, probes it, sets up a decoder,
+    reads packets, decodes them, and cleans up.
 
-  This tells us exactly what to fuzz.
+    This tells us exactly what to fuzz.
 
   ## Choosing the entry point
-  We fuzz the full pipeline: avformat_open_input through
-  avcodec_receive_frame. Maximum code coverage from one entry point.
+    We fuzz the full pipeline: avformat_open_input through
+    avcodec_receive_frame. Maximum code coverage from one entry point.
 
-  We use the public API, not internal functions. The public API
-  handles all initialization and is designed to accept untrusted
-  input.
+    We use the public API, not internal functions. The public API
+    handles all initialization and is designed to accept untrusted
+    input.
 
-  For reference, Google's OSS-Fuzz targets individual FFmpeg decoders
-  and demuxers separately for depth. Our approach trades that depth
-  for breadth, one input exercises the entire stack.
-  https://github.com/google/oss-fuzz/blob/master/projects/ffmpeg/build.sh
+    For reference, Google's OSS-Fuzz targets individual FFmpeg decoders
+    and demuxers separately for depth. Our approach trades that depth
+    for breadth, one input exercises the entire stack.
+    https://github.com/google/oss-fuzz/blob/master/projects/ffmpeg/build.sh
 
   ## Why we can fuzz FFmpeg directly
-  The Frida trace shows the app calls standard FFmpeg public API
-  functions. No private symbols, no internal hooks, no custom I/O
-  callbacks. Our harness will call the same functions in the same
-  order.
+    The Frida trace shows the app calls standard FFmpeg public API
+    functions. No private symbols, no internal hooks, no custom I/O
+    callbacks. Our harness will call the same functions in the same
+    order.
 
   ## The plan
     1. Take fuzzed input as a file
@@ -421,9 +420,9 @@ author: feelqah
     6. Loop av_read_frame + avcodec_send_packet + avcodec_receive_frame
     7. Clean up and return
 
-  Later when we configure persistent mode, this entire sequence will be
-  the body of our persistent loop. Each iteration gets a new fuzzed file,
-  and the whole pipeline runs again.
+    Later when we configure persistent mode, this entire sequence will be
+    the body of our persistent loop. Each iteration gets a new fuzzed file,
+    and the whole pipeline runs again.
 
 
 # Setting Up the Environment
@@ -493,10 +492,9 @@ author: feelqah
     If that doesn't return anything, something went wrong during the
     build. Check the output of build_qemu_support.sh for errors.
 
-    ## Install the Android NDK
+  ## Install the Android NDK
 
     Download it from:
-
       https://developer.android.com/ndk/downloads
 
     Or grab it directly:
@@ -514,65 +512,66 @@ author: feelqah
 
       which aarch64-linux-android35-clang
 
-## Setting up the aarch64 sysroot
-  When QEMU runs our aarch64 harness, it needs two things: the Android
-  dynamic linker (linker64) and the aarch64 system libraries. The linker
-  doesn't exist on your x86_64 host, and neither do aarch64 versions of
-  libc, libm, etc.
+  ## Setting up the aarch64 sysroot
+    When QEMU runs our aarch64 harness, it needs two things: the Android
+    dynamic linker (linker64) and the aarch64 system libraries. The linker
+    doesn't exist on your x86_64 host, and neither do aarch64 versions of
+    libc, libm, etc.
 
-  We already have a rooted phone. So we pull the sysroot files from the same
-  device. This gives us the exact linker and libraries the target was actually
-  running against.
+    We already have a rooted phone. So we pull the sysroot files from the same
+    device. This gives us the exact linker and libraries the target was actually
+    running against.
 
-  First, create the sysroot dir with Android's filesystem layout:
+    First, create the sysroot dir with Android's filesystem layout:
 
-    mkdir -p ~/fuzzing/xiaomi/sysroot/system/bin
-    mkdir -p ~/fuzzing/xiaomi/sysroot/system/lib64
+      mkdir -p ~/fuzzing/xiaomi/sysroot/system/bin
+      mkdir -p ~/fuzzing/xiaomi/sysroot/system/lib64
 
-  Pull the dynamic linker:
+    Pull the dynamic linker:
 
-    adb pull /system/bin/linker64 ~/fuzzing/xiaomi/sysroot/system/bin/
+      adb pull /system/bin/linker64 ~/fuzzing/xiaomi/sysroot/system/bin/
 
-  Pull the system libraries our target needs. We know the dependencies
-  from the readelf output earlier (libm.so, libz.so, liblog.so, libc.so,
-  libdl.so):
+    Pull the system libraries our target needs. We know the dependencies
+    from the readelf output earlier (libm.so, libz.so, liblog.so, libc.so,
+    libdl.so):
 
-    adb pull /system/lib64/libc.so ~/fuzzing/xiaomi/sysroot/system/lib64/
-    adb pull /system/lib64/libm.so ~/fuzzing/xiaomi/sysroot/system/lib64/
-    adb pull /system/lib64/libz.so ~/fuzzing/xiaomi/sysroot/system/lib64/
-    adb pull /system/lib64/liblog.so ~/fuzzing/xiaomi/sysroot/system/lib64/
-    adb pull /system/lib64/libdl.so ~/fuzzing/xiaomi/sysroot/system/lib64/
-    adb pull /system/lib64/libc++.so ~/fuzzing/xiaomi/sysroot/system/lib64/
+      adb pull /system/lib64/libc.so ~/fuzzing/xiaomi/sysroot/system/lib64/
+      adb pull /system/lib64/libm.so ~/fuzzing/xiaomi/sysroot/system/lib64/
+      adb pull /system/lib64/libz.so ~/fuzzing/xiaomi/sysroot/system/lib64/
+      adb pull /system/lib64/liblog.so ~/fuzzing/xiaomi/sysroot/system/lib64/
+      adb pull /system/lib64/libdl.so ~/fuzzing/xiaomi/sysroot/system/lib64/
+      adb pull /system/lib64/libc++.so ~/fuzzing/xiaomi/sysroot/system/lib64/
 
-  We tell QEMU to use this sysroot with the QEMU_LD_PREFIX environment
-  variable.
+    We tell QEMU to use this sysroot with the QEMU_LD_PREFIX environment
+    variable.
 
-  The target .so is already in the lib/ directory, and we point
-  LD_LIBRARY_PATH at it. This keeps it separate from the system libs.
+    The target .so is already in the lib/ directory, and we point
+    LD_LIBRARY_PATH at it. This keeps it separate from the system libs.
 
   ## Set up the working directory
     mkdir -p ~/fuzzing/xiaomi/harness
     mkdir -p ~/fuzzing/xiaomi/corpus
     mkdir -p ~/fuzzing/xiaomi/output
 
-  Your working directory should now look like this:
+    Your working directory should now look like this:
 
-    ~/fuzzing/xiaomi/
-    ├── sysroot/
-    │   └── system/
-    │       ├── bin/
-    │       │   └── linker64
-    │       └── lib64/
-    │           ├── libc.so
-    │           ├── libdl.so
-    │           ├── libm.so
-    │           ├── libz.so
-    │           └── liblog.so
-    ├── lib/
-    │   └── libmigalleryffmpeg.so
-    ├── harness/
-    ├── corpus/
-    └── output/
+      ~/fuzzing/xiaomi/
+      ├── sysroot/
+      │   └── system/
+      │       ├── bin/
+      │       │   └── linker64
+      │       └── lib64/
+      │           ├── libc.so
+      │           ├── libdl.so
+      │           ├── libm.so
+      │           ├── libz.so
+      │           ├── liblog.so
+      |           └── libc++.so
+      ├── lib/
+      │   └── libmigalleryffmpeg.so
+      ├── harness/
+      ├── corpus/
+      └── output/
 
   ## Verify QEMU works
     Let's do a quick sanity check. Compile a trivial aarch64 binary and
@@ -615,113 +614,111 @@ author: feelqah
 
 # Writing the Harness
   The harness is a small C program that does one thing: takes a file,
-  feeds it through the FFmpeg decode pipeline, and exits. No GUI, no
-  JNI, no Android framework.
+  feeds it through the FFmpeg decode pipeline, and exits.
 
   AFL++ will run this program thousands of times with different mutated
   files. If any of them cause a crash, AFL++ catches it.
 
-## Getting the FFmpeg headers
-  We need FFmpeg headers to compile our harness. The binary reports
-  FFmpeg 4.3.1 (confirmed by calling av_version_info() and
-  avformat_configuration() on the .so), but it's built from Xiaomi's
-  internal fork of Bilibili's ijkplayer with custom struct layouts.
+  ## Getting the FFmpeg headers
+    We need FFmpeg headers to compile our harness. The binary reports
+    FFmpeg 4.3.1 (confirmed by calling av_version_info() and
+    avformat_configuration() on the .so), but it's built from Xiaomi's
+    internal fork of bilibili's ijkplayer with custom struct layouts.
 
-  Stock FFmpeg 4.3.1 headers segfault when accessing struct fields.
-  Bilibili's public ff4.0 fork also segfaults. The latest FFmpeg
-  headers work. The struct offsets happen to match this binary.
+    Stock FFmpeg 4.3.1 headers segfault when accessing struct fields.
+    Bilibili's public ff4.0 fork also segfaults. The latest FFmpeg
+    headers work. The struct offsets happen to match this binary.
 
-    cd ~/fuzzing/xiaomi
-    git clone --depth 1 https://github.com/FFmpeg/FFmpeg
+      cd ~/fuzzing/xiaomi
+      git clone --depth 1 https://github.com/FFmpeg/FFmpeg
 
-    cd FFmpeg
-    ./configure --disable-everything --disable-programs --disable-doc --disable-x86asm
-    cd ..
+      cd FFmpeg
+      ./configure --disable-everything --disable-programs --disable-doc --disable-x86asm
+      cd ..
 
-  The configure step generates config headers (avconfig.h, config.h)
-  that other headers depend on. We're not building FFmpeg, just
-  generating what our harness needs to compile.
+    The configure step generates config headers (avconfig.h, config.h)
+    that other headers depend on. We're not building FFmpeg, just
+    generating what our harness needs to compile.
 
+  ## The harness code
+    Create ~/fuzzing/xiaomi/harness/harness.c:
 
-## The harness code
-  Create ~/fuzzing/xiaomi/harness/harness.c:
+      #include <stdio.h>
+      #include <libavformat/avformat.h>
+      #include <libavcodec/avcodec.h>
 
-    #include <stdio.h>
-    #include <libavformat/avformat.h>
-    #include <libavcodec/avcodec.h>
+      int decode_file(const char *filename) {
+          AVFormatContext *fmt_ctx = NULL;
+          AVCodecContext *codec_ctx = NULL;
+          AVPacket *pkt = NULL;
+          AVFrame *frame = NULL;
+          int ret, stream_idx, frames_decoded = 0;
 
-    int decode_file(const char *filename) {
-        AVFormatContext *fmt_ctx = NULL;
-        AVCodecContext *codec_ctx = NULL;
-        AVPacket *pkt = NULL;
-        AVFrame *frame = NULL;
-        int ret, stream_idx, frames_decoded = 0;
+          ret = avformat_open_input(&fmt_ctx, filename, NULL, NULL);
+          if (ret < 0) goto cleanup;
 
-        ret = avformat_open_input(&fmt_ctx, filename, NULL, NULL);
-        if (ret < 0) goto cleanup;
+          ret = avformat_find_stream_info(fmt_ctx, NULL);
+          if (ret < 0) goto cleanup;
 
-        ret = avformat_find_stream_info(fmt_ctx, NULL);
-        if (ret < 0) goto cleanup;
+          const AVCodec *decoder = NULL;
+          stream_idx = av_find_best_stream(
+              fmt_ctx, AVMEDIA_TYPE_VIDEO, -1, -1, &decoder, 0
+          );
+          if (stream_idx < 0 || !decoder) {
+              decoder = NULL;
+              stream_idx = av_find_best_stream(
+                  fmt_ctx, AVMEDIA_TYPE_AUDIO, -1, -1, &decoder, 0
+              );
+          }
+          if (stream_idx < 0 || !decoder) goto cleanup;
 
-        const AVCodec *decoder = NULL;
-        stream_idx = av_find_best_stream(
-            fmt_ctx, AVMEDIA_TYPE_VIDEO, -1, -1, &decoder, 0
-        );
-        if (stream_idx < 0 || !decoder) {
-            decoder = NULL;
-            stream_idx = av_find_best_stream(
-                fmt_ctx, AVMEDIA_TYPE_AUDIO, -1, -1, &decoder, 0
-            );
-        }
-        if (stream_idx < 0 || !decoder) goto cleanup;
+          codec_ctx = avcodec_alloc_context3(decoder);
+          if (!codec_ctx) goto cleanup;
 
-        codec_ctx = avcodec_alloc_context3(decoder);
-        if (!codec_ctx) goto cleanup;
+          // NO avcodec_parameters_to_context
+          // NO pkt->stream_index filtering
 
-        // NO avcodec_parameters_to_context
-        // NO pkt->stream_index filtering
+          AVDictionary *opts = NULL;
+          av_dict_set(&opts, "threads", "1", 0);
+          ret = avcodec_open2(codec_ctx, decoder, &opts);
+          av_dict_free(&opts);
+          if (ret < 0) goto cleanup;
 
-        AVDictionary *opts = NULL;
-        av_dict_set(&opts, "threads", "1", 0);
-        ret = avcodec_open2(codec_ctx, decoder, &opts);
-        av_dict_free(&opts);
-        if (ret < 0) goto cleanup;
+          pkt = av_packet_alloc();
+          frame = av_frame_alloc();
+          if (!pkt || !frame) goto cleanup;
 
-        pkt = av_packet_alloc();
-        frame = av_frame_alloc();
-        if (!pkt || !frame) goto cleanup;
+          while (av_read_frame(fmt_ctx, pkt) >= 0) {
+              ret = avcodec_send_packet(codec_ctx, pkt);
+              av_packet_unref(pkt);
+              if (ret < 0) continue;
+              while (avcodec_receive_frame(codec_ctx, frame) >= 0) {
+                  av_frame_unref(frame);
+                  if (++frames_decoded >= 3) goto cleanup;
+              }
+          }
 
-        while (av_read_frame(fmt_ctx, pkt) >= 0) {
-            ret = avcodec_send_packet(codec_ctx, pkt);
-            av_packet_unref(pkt);
-            if (ret < 0) continue;
-            while (avcodec_receive_frame(codec_ctx, frame) >= 0) {
-                av_frame_unref(frame);
-                if (++frames_decoded >= 3) goto cleanup;
-            }
-        }
+      cleanup:
+          if (frame)     av_frame_free(&frame);
+          if (pkt)       av_packet_free(&pkt);
+          if (codec_ctx) avcodec_free_context(&codec_ctx);
+          if (fmt_ctx)   avformat_close_input(&fmt_ctx);
+          return 0;
+      }
 
-    cleanup:
-        if (frame)     av_frame_free(&frame);
-        if (pkt)       av_packet_free(&pkt);
-        if (codec_ctx) avcodec_free_context(&codec_ctx);
-        if (fmt_ctx)   avformat_close_input(&fmt_ctx);
-        return 0;
-    }
+      int main(int argc, char *argv[]) {
+          if (argc < 2) return 1;
+          return decode_file(argv[1]);
+      }
 
-    int main(int argc, char *argv[]) {
-        if (argc < 2) return 1;
-        return decode_file(argv[1]);
-    }
+    Notes:
+      threads=1 via AVDictionary prevents avcodec_open2 from spawning a
+      thread pool that corrupts persistent mode.
 
-  Notes:
-    threads=1 via AVDictionary prevents avcodec_open2 from spawning a
-    thread pool that corrupts persistent mode.
+      Maximum 3 frames decoded. Video first, audio fallback.
 
-    Maximum 3 frames decoded. Video first, audio fallback.
-
-    Cleanup frees everything. In persistent mode the function loops,
-    so leaks accumulate.
+      Cleanup frees everything. In persistent mode the function loops,
+      so leaks accumulate.
 
   ## Why avcodec_parameters_to_context and stream filtering are skipped
     Both were in the first version. The harness segfaulted on every input.
@@ -747,24 +744,24 @@ author: feelqah
       QEMU_SET_ENV=LD_LIBRARY_PATH=./lib \
       afl-qemu-trace ./harness_bin test.mp4; echo "exit code: $?"
 
-  If it says "exit code: 0", the harness works. If it segfaults,
-  check your sysroot and library paths.
+    If it says "exit code: 0", the harness works. If it segfaults,
+    check your sysroot and library paths.
 
 
 # Configuring Persistent Mode
   The harness works under QEMU. Now we make it fast.
 
   ## Finding the function address
-  Our harness is a PIE binary. Find the offset of decode_file:
+    Our harness is a PIE binary. Find the offset of decode_file:
 
-    aarch64-linux-gnu-nm harness_bin | grep decode_file
+      aarch64-linux-gnu-nm harness_bin | grep decode_file
 
-    0000000000001cc8 T decode_file
+      0000000000001cc8 T decode_file
 
-  QEMU loads PIE aarch64 binaries at 0x5500000000 (verify with
-  AFL_QEMU_DEBUG_MAPS=1 if needed). The runtime address is:
+    QEMU loads PIE aarch64 binaries at 0x5500000000 (verify with
+    AFL_QEMU_DEBUG_MAPS=1 if needed). The runtime address is:
 
-    0x5500000000 + 0x1cc8 = 0x5500001cc8
+      0x5500000000 + 0x1cc8 = 0x5500001cc8
 
   ## The environment variables
 
@@ -792,10 +789,10 @@ author: feelqah
       afl-fuzz -Q -i corpus_test -o /tmp/test_fuzz_output \
       -t 2000 -- ./harness_bin @@
 
-  If you see the AFL++ status screen with exec speed ticking up,
-  everything works. Ctrl+C, this was just a smoke test.
+    If you see the AFL++ status screen with exec speed ticking up,
+    everything works. Ctrl+C, this was just a smoke test.
 
-    rm -rf /tmp/test_fuzz_output corpus_test
+      rm -rf /tmp/test_fuzz_output corpus_test
 
 # Building the Corpus
   AFL++ needs seed files to start with. It mutates these seeds to
@@ -804,66 +801,65 @@ author: feelqah
   most people think, so let's go through the options.
 
   ## Option 1: generate a multi-format corpus (what we'll use)
-  The trick is to generate the smallest possible files across as
-  many formats and codecs as our target supports. Small files mean
-  fast iterations. Many formats mean broad coverage. We use ffmpeg
-  to generate tiny valid files for each:
+    The trick is to generate the smallest possible files across as
+    many formats and codecs as our target supports. Small files mean
+    fast iterations. Many formats mean broad coverage. We use ffmpeg
+    to generate tiny valid files for each:
 
-    cd ~/fuzzing/xiaomi/corpus
+      cd ~/fuzzing/xiaomi/corpus
 
-    # video formats — different containers and codecs
-    ffmpeg -f lavfi -i "testsrc=d=0.1:s=8x8:r=1" -c:v libx264 -t 0.1 tiny_h264.mp4 -y
-    ffmpeg -f lavfi -i "testsrc=d=0.1:s=8x8:r=1" -c:v mpeg4 -t 0.1 tiny_mpeg4.avi -y
-    ffmpeg -f lavfi -i "testsrc=d=0.1:s=8x8:r=1" -c:v libx264 -t 0.1 -f matroska tiny.mkv -y
-    ffmpeg -f lavfi -i "testsrc=d=0.1:s=8x8:r=1" -c:v flv1 -t 0.1 -f flv tiny.flv -y
-    ffmpeg -f lavfi -i "testsrc=d=0.1:s=8x8:r=1" -c:v libx264 -t 0.1 -f mpegts tiny.ts -y
-    ffmpeg -f lavfi -i "testsrc=d=0.1:s=8x8:r=1" -c:v wmv2 -t 0.1 tiny.wmv -y
-    ffmpeg -f lavfi -i "testsrc=d=0.1:s=8x8:r=1" -c:v libvpx -t 0.1 tiny.webm -y
+      # video formats — different containers and codecs
+      ffmpeg -f lavfi -i "testsrc=d=0.1:s=8x8:r=1" -c:v libx264 -t 0.1 tiny_h264.mp4 -y
+      ffmpeg -f lavfi -i "testsrc=d=0.1:s=8x8:r=1" -c:v mpeg4 -t 0.1 tiny_mpeg4.avi -y
+      ffmpeg -f lavfi -i "testsrc=d=0.1:s=8x8:r=1" -c:v libx264 -t 0.1 -f matroska tiny.mkv -y
+      ffmpeg -f lavfi -i "testsrc=d=0.1:s=8x8:r=1" -c:v flv1 -t 0.1 -f flv tiny.flv -y
+      ffmpeg -f lavfi -i "testsrc=d=0.1:s=8x8:r=1" -c:v libx264 -t 0.1 -f mpegts tiny.ts -y
+      ffmpeg -f lavfi -i "testsrc=d=0.1:s=8x8:r=1" -c:v wmv2 -t 0.1 tiny.wmv -y
+      ffmpeg -f lavfi -i "testsrc=d=0.1:s=8x8:r=1" -c:v libvpx -t 0.1 tiny.webm -y
 
-    # image formats — single frame
-    ffmpeg -f lavfi -i "color=black:s=8x8:d=0.1" -frames:v 1 tiny.gif -y
-    ffmpeg -f lavfi -i "color=black:s=8x8:d=0.1" -frames:v 1 tiny.png -y
-    ffmpeg -f lavfi -i "color=black:s=8x8:d=0.1" -frames:v 1 tiny.bmp -y
-    ffmpeg -f lavfi -i "color=black:s=8x8:d=0.1" -frames:v 1 -c:v mjpeg tiny.jpg -y
-    ffmpeg -f lavfi -i "color=black:s=8x8:d=0.1" -frames:v 1 -c:v libwebp tiny.webp -y
+      # image formats — single frame
+      ffmpeg -f lavfi -i "color=black:s=8x8:d=0.1" -frames:v 1 tiny.gif -y
+      ffmpeg -f lavfi -i "color=black:s=8x8:d=0.1" -frames:v 1 tiny.png -y
+      ffmpeg -f lavfi -i "color=black:s=8x8:d=0.1" -frames:v 1 tiny.bmp -y
+      ffmpeg -f lavfi -i "color=black:s=8x8:d=0.1" -frames:v 1 -c:v mjpeg tiny.jpg -y
+      ffmpeg -f lavfi -i "color=black:s=8x8:d=0.1" -frames:v 1 -c:v libwebp tiny.webp -y
 
-    # audio formats
-    ffmpeg -f lavfi -i "sine=f=440:d=0.1" -c:a aac -b:a 32k tiny.aac -y
-    ffmpeg -f lavfi -i "sine=f=440:d=0.1" -c:a libmp3lame -b:a 32k tiny.mp3 -y
-    ffmpeg -f lavfi -i "sine=f=440:d=0.1" -c:a flac tiny.flac -y
-    ffmpeg -f lavfi -i "sine=f=440:d=0.1" -c:a libopus tiny.opus -y
-    ffmpeg -f lavfi -i "sine=f=440:d=0.1" -c:a libvorbis tiny.ogg -y
-    ffmpeg -f lavfi -i "sine=f=440:d=0.1" -c:a pcm_s16le tiny.wav -y
+      # audio formats
+      ffmpeg -f lavfi -i "sine=f=440:d=0.1" -c:a aac -b:a 32k tiny.aac -y
+      ffmpeg -f lavfi -i "sine=f=440:d=0.1" -c:a libmp3lame -b:a 32k tiny.mp3 -y
+      ffmpeg -f lavfi -i "sine=f=440:d=0.1" -c:a flac tiny.flac -y
+      ffmpeg -f lavfi -i "sine=f=440:d=0.1" -c:a libopus tiny.opus -y
+      ffmpeg -f lavfi -i "sine=f=440:d=0.1" -c:a libvorbis tiny.ogg -y
+      ffmpeg -f lavfi -i "sine=f=440:d=0.1" -c:a pcm_s16le tiny.wav -y
 
-  19 files, all under 10KB, covering 7 container formats, 5 image
-  formats, and 7 audio formats. Each one hits a different demuxer
-  and decoder inside the target. The fuzzer takes these as starting
-  points and mutates them into millions of variations.
+    19 files, all under 10KB, covering 7 container formats, 5 image
+    formats, and 7 audio formats. Each one hits a different demuxer
+    and decoder inside the target. The fuzzer takes these as starting
+    points and mutates them into millions of variations.
 
-  ## Option 2: OSS-Fuzz corpus (more coverage, much slower)
+  ## Option 2: OSS-Fuzz corpus (more coverage)
+    Google fuzzes FFmpeg continuously through OSS-Fuzz. Their evolved
+    corpus is publicly available as a daily backup zip. The URL follows
+    this pattern (verify the exact fuzzer name — it may change):
 
-  Google fuzzes FFmpeg continuously through OSS-Fuzz. Their evolved
-  corpus is publicly available as a daily backup zip. The URL follows
-  this pattern (verify the exact fuzzer name — it may change):
+      curl -o /tmp/demuxer_corpus.zip \
+        "https://storage.googleapis.com/ffmpeg-backup.clusterfuzz-external.appspot.com/corpus/libFuzzer/ffmpeg_DEMUXER_fuzzer/public.zip"
 
-    curl -o /tmp/demuxer_corpus.zip \
-      "https://storage.googleapis.com/ffmpeg-backup.clusterfuzz-external.appspot.com/corpus/libFuzzer/ffmpeg_DEMUXER_fuzzer/public.zip"
+    Note: the exact fuzzer target name (ffmpeg_DEMUXER_fuzzer) should be
+    verified against the OSS-Fuzz project page for FFmpeg at
+    https://github.com/google/oss-fuzz/tree/master/projects/ffmpeg.
+    OSS-Fuzz corpus access is documented at
+    https://google.github.io/oss-fuzz/advanced-topics/corpora/.
 
-  Note: the exact fuzzer target name (ffmpeg_DEMUXER_fuzzer) should be
-  verified against the OSS-Fuzz project page for FFmpeg at
-  https://github.com/google/oss-fuzz/tree/master/projects/ffmpeg.
-  OSS-Fuzz corpus access is documented at
-  https://google.github.io/oss-fuzz/advanced-topics/corpora/.
+    The corpus can be several hundred MB and contain tens of thousands of
+    files. These are highly optimized edge-case inputs that took millions
+    of CPU hours to evolve.
 
-  The corpus can be several hundred MB and contain tens of thousands of
-  files. These are highly optimized edge-case inputs that took millions
-  of CPU hours to evolve.
+    If you want to use it, filter out crashing files first, then minimize.
+    This is a multi-hour process for 40000 files.
 
-  If you want to use it, filter out crashing files first, then minimize.
-  This is a multi-hour process for 40000 files.
-
-  For this tutorial we'll stick with the generated corpus and let
-  AFL++ evolve its own interesting inputs from there.
+    For this tutorial we'll stick with the generated corpus and let
+    AFL++ evolve its own interesting inputs from there.
 
   ## Option 3: real-world files (okay as a supplement)
     Grab a handful of legitimate media files from the internet or your
@@ -890,7 +886,6 @@ author: feelqah
 
     This runs every seed through the harness under QEMU and keeps only
     the ones that contribute unique coverage.
-
 
   ## Verify the seeds
     cd ~/fuzzing/xiaomi
@@ -926,7 +921,7 @@ author: feelqah
                                   system libraries
       QEMU_SET_ENV                passes LD_LIBRARY_PATH into the guest
                                   so QEMU finds our target .so
-      AFL_QEMU_PERSISTENT_ADDR    start of the persistent loop — the
+      AFL_QEMU_PERSISTENT_ADDR    start of the persistent loop: the
                                   address of decode_file (PIE base
                                   0x5500000000 + offset 0x1cc8)
       AFL_QEMU_PERSISTENT_GPR     restores registers each iteration so
@@ -935,9 +930,9 @@ author: feelqah
                                   state and prevent FD/memory leaks
       AFL_QEMU_FORCE_DFL          forces QEMU to ignore guest signal
                                   handlers so AFL++ catches crashes
-      AFL_QEMU_INST_RANGES        only instrument this module — accepts
+      AFL_QEMU_INST_RANGES        only instrument this module(accepts
                                   module names, no need to hardcode
-                                  address ranges that can shift
+                                  address ranges that can shift)
 
     afl-fuzz flags:
 
@@ -951,8 +946,8 @@ author: feelqah
 
   ## Parallelizing with multiple instances
     A single AFL++ instance under QEMU mode uses one core. On a heavy
-    target like this one, that might get you 50-200 exec/s. Spreading
-    across cores multiplies that linearly. It's the easiest performance
+    target like this one, that might get you 30-200 exec/s (depending on your CPU).
+    Spreading across cores multiplies that linearly. It's the easiest performance
     win available and takes two minutes to set up.
 
     AFL++ parallelization uses one main instance (-M) and N-1 secondary
@@ -1006,25 +1001,24 @@ author: feelqah
   native library running on an x86_64 machine with no device attached
   and no source code.
 
-  The approach generalizes. The target here is libmigalleryffmpeg.so
-  but the method works on any Android native library that processes
-  external input and exposes a callable API. Pull the .so, trace the
-  real app with Frida to find the pipeline, write a harness, cross-
-  compile, run under QEMU. The steps are the same.
+  The target here is libmigalleryffmpeg.so but the method works on any
+  Android native library.
+  Pull the .so, trace the real app with Frida to find out which functions get called,
+  write a harness, cross-compile it, and run under QEMU. The steps are the same.
 
   The one part that changes per target is the harness. Libraries that
   register JNI_OnLoad and make JNI callbacks need a stub JNIEnv. Libraries
-  that pull Android framework services need those services faked out.
-  That's additional work, but it's scoped work, stub what the library
-  asks for and nothing else.
+  that pull Android framework services need those services stubbed out.
+  That's additional work. Stub what the library asks for and nothing else.
 
   The other variable is speed. QEMU mode costs you a factor of 2-5x
-  compared to native instrumented binaries. Persistent mode claws most
+  compared to native instrumented binaries. Persistent mode recovers most
   of that back. Parallelization does the rest. For a binary-only
   cross-architecture target, this is as fast as it gets without
   source code.
 
   Let it run. Wait. Maybe it finds some crashes.
+  Happy hunting.
 </pre>
 
 <a class="back" href="../index.html">← back</a>
